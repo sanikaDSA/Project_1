@@ -1,0 +1,36 @@
+{
+  "version": "1.0.0",
+  "description": "Sehat AI Clinician Triage Urgency Rules Engine",
+  "urgency_tiers": {
+    "urgent": {
+      "level": 3,
+      "label_en": "Urgent Review Required",
+      "label_hi": "तत्काल डॉक्टर समीक्षा आवश्यक (Urgent)",
+      "triggers": [
+        { "condition": "emergency_escalation == true", "reason": "Emergency trigger occurred during dialogue" },
+        { "condition": "blood_sugar_reading > 300 or blood_sugar_reading < 60", "reason": "Extreme glucose readings (Severe Hyper/Hypoglycemia)" },
+        { "condition": "risk_signals_count >= 3", "reason": "Multiple concurrent red-flag symptoms reported" },
+        { "condition": "symptoms_contains('non_healing_ulcer') and symptoms_contains('numbness')", "reason": "Diabetic foot risk with sensory neuropathy" }
+      ]
+    },
+    "soon": {
+      "level": 2,
+      "label_en": "Review Soon (1-3 Days)",
+      "label_hi": "शीघ्र डॉक्टर परामर्श (Soon)",
+      "triggers": [
+        { "condition": "risk_signals_count >= 1", "reason": "Moderate risk signals detected (e.g. polyuria, polydipsia, unmanaged medication)" },
+        { "condition": "blood_sugar_reading >= 200", "reason": "Elevated blood sugar (> 200 mg/dL)" },
+        { "condition": "family_history == true and symptoms_count >= 1", "reason": "Strong family history combined with emerging symptoms" },
+        { "condition": "gestational_diabetes_history == true", "reason": "Prior gestational diabetes history" }
+      ]
+    },
+    "routine": {
+      "level": 1,
+      "label_en": "Routine Appointment",
+      "label_hi": "सामान्य परामर्श (Routine)",
+      "triggers": [
+        { "condition": "default", "reason": "No acute or red-flag risk signals identified" }
+      ]
+    }
+  }
+}

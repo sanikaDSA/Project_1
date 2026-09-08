@@ -1,0 +1,82 @@
+{
+  "version": "1.0.0",
+  "description": "Sehat AI Clinical Emergency Lexicon and Phrase Matching Database (Hindi, Hinglish, English)",
+  "categories": {
+    "cardiac": {
+      "severity": "critical",
+      "action_hi": "सीने या दिल में तेज दर्द, दबाव या हार्ट अटैक के लक्षण एक अति-गंभीर मेडिकल इमरजेंसी हैं। कृपया तुरंत Poona Hospital के इमरजेंसी विभाग (Emergency Department) में जाएँ या 112/108 एम्बुलेंस को कॉल करें।",
+      "keywords_devanagari": [
+        "सीने में दर्द", "छाती में दर्द", "छाती में बहुत तेज दर्द", "दिल का दौरा", "हार्ट अटैक",
+        "सीने में भारीपन", "सीने में दबाव", "दिल में दर्द", "छाती दब रही है", "सांस रुक रही है", "छाती में जकड़न"
+      ],
+      "keywords_latin": [
+        "chest pain", "severe chest pain", "heart attack", "seene me dard", "chaati me dard",
+        "chhati me dard", "dil me dard", "chest tightness", "chest pressure", "cardiac arrest"
+      ]
+    },
+    "respiratory": {
+      "severity": "critical",
+      "action_hi": "सांस लेने में अत्यधिक तकलीफ या दम घुटना एक गंभीर इमरजेंसी है। कृपया तुरंत Poona Hospital आपातकालीन विभाग या नजदीकी आपातकालीन चिकित्सा सहायता लें।",
+      "keywords_devanagari": [
+        "सांस नहीं आ रही", "सांस फूल रही है", "दम घुट रहा है", "सांस लेने में बहुत तकलीफ",
+        "सांस रुकने लगी", "दम फूलना", "सांस लेने में भारी परेशानी"
+      ],
+      "keywords_latin": [
+        "breathless", "breathlessness", "cannot breathe", "difficulty breathing", "severe shortness of breath",
+        "saans phool rahi", "dam ghut raha", "saans nahi aa rahi", "suffocation"
+      ]
+    },
+    "fainting_consciousness": {
+      "severity": "critical",
+      "action_hi": "बेहोशी, चक्कर खाकर गिरना या चेतना खोना तुरंत चिकित्सकीय ध्यान की मांग करता है। कृपया तत्काल Poona Hospital इमरजेंसी या आपातकालीन सहायता लें।",
+      "keywords_devanagari": [
+        "बेहोश", "बेहोशी", "बेहोश हो गया", "चक्कर खाकर गिर गया", "होश खो बैठा", "आंखों के आगे अंधेरा छा गया", "अचेत", "मूर्छित"
+      ],
+      "keywords_latin": [
+        "faint", "fainting", "fainted", "unconscious", "loss of consciousness", "passed out", "behoshi", "behosh", "blackout"
+      ]
+    },
+    "seizure": {
+      "severity": "critical",
+      "action_hi": "दौरे पड़ना या शरीर में तेज झटके आना एक आपातकालीन स्थिति है। रोगी को सुरक्षित लिटाएं और तुरंत Poona Hospital डॉक्टर या एम्बुलेंस बुलाएं।",
+      "keywords_devanagari": [
+        "दौरा", "दौरे पड़ रहे हैं", "मिर्गी का दौरा", "शरीर अकड़ गया", "झटके आ रहे हैं"
+      ],
+      "keywords_latin": [
+        "seizure", "convulsion", "fits", "daura", "epilepsy fit", "shaking uncontrollably"
+      ]
+    },
+    "severe_distress_vomiting": {
+      "severity": "critical",
+      "action_hi": "लगातार तेज उल्टियाँ, पानी भी न रुकना या गंभीर शारीरिक संकट होना डिहाइड्रेशन और DKA का संकेत हो सकता है। तुरंत Poona Hospital इमरजेंसी डॉक्टर को दिखाएं।",
+      "keywords_devanagari": [
+        "अभी बहुत तकलीफ हो रही है", "बहुत ज्यादा उल्टी हो रही है", "पानी भी नहीं पच रहा", "उल्टी रुक नहीं रही", "खून की उल्टी", "असहनीय दर्द"
+      ],
+      "keywords_latin": [
+        "severe vomiting", "continuous vomiting", "blood in vomit", "cannot keep fluids down",
+        "bahut takleef ho rahi", "unbearable pain", "acute distress"
+      ]
+    },
+    "severe_hypoglycemia_confusion": {
+      "severity": "critical",
+      "action_hi": "अचानक तेज पसीना, थरथराहट और गंभीर भ्रम या होश खोना अत्यधिक लो-शुगर का लक्षण हो सकता है। तुरंत मीठा पानी या ग्लूकोज लें और Poona Hospital आपातकालीन विभाग से तुरंत संपर्क करें।",
+      "keywords_devanagari": [
+        "बहुत तेज कांप रहा हूँ", "पसीना और भ्रम", "शुगर 40", "शुगर 30", "शुगर 50 से कम", "हाथ बहुत कांप रहे हैं", "गंभीर भ्रम"
+      ],
+      "keywords_latin": [
+        "severe hypoglycemia", "severe shaking and sweating", "sugar below 50", "sugar 40", "sugar 30",
+        "deep confusion", "sweating and confused"
+      ]
+    },
+    "self_harm": {
+      "severity": "critical",
+      "action_hi": "यदि आप अत्यधिक मानसिक तनाव में हैं, तो कृपया तुरंत Poona Hospital हेल्पलाइन या राष्ट्रीय आपातकालीन सेवा से बात करें। आपकी सुरक्षा अत्यंत महत्वपूर्ण है।",
+      "keywords_devanagari": [
+        "आत्महत्या", "जान देना चाहता हूँ", "मरना चाहता हूँ", "खुद को नुकसान"
+      ],
+      "keywords_latin": [
+        "suicide", "kill myself", "want to die", "self harm", "mar jana chahta"
+      ]
+    }
+  }
+}

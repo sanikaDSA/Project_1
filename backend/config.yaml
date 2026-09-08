@@ -1,0 +1,54 @@
+# Pipeline Master Configuration
+pipeline:
+  name: "Doctor-Patient-Multilingual-STT"
+  version: "1.0.0"
+
+audio:
+  target_sample_rate: 16000
+  target_channels: 1
+  supported_extensions:
+    - ".wav"
+    - ".mp3"
+    - ".m4a"
+    - ".flac"
+  normalization_peak: 0.95
+  max_duration_seconds: 300
+  min_duration_seconds: 0.5
+
+sarvam:
+  api_url: "https://api.sarvam.ai/speech-to-text"
+  model: "saaras:v3"
+  language_code: "unknown" # 'unknown' for multilingual auto-detection, or 'mr-IN', 'hi-IN', 'en-IN'
+  timeout_seconds: 60
+  tts_speaker: "hemant" # Clinical/Professional Indian Hindi Male Voice
+
+dataset:
+  raw_audio_dir: "datasets/raw_audio"
+  processed_audio_dir: "datasets/processed_audio"
+  transcripts_dir: "datasets/transcripts"
+  manifests_dir: "datasets/manifests"
+  reviewed_dir: "datasets/reviewed"
+  splits:
+    train: 0.8
+    validation: 0.1
+    test: 0.1
+  random_seed: 42
+
+training:
+  model_architecture: "conformer_ctc"
+  encoder_dim: 256
+  num_encoder_layers: 4
+  batch_size: 4
+  num_epochs: 15
+  learning_rate: 0.0003
+  weight_decay: 0.0001
+  gradient_accumulation_steps: 2
+  mixed_precision: true # Automatic Mixed Precision (AMP)
+  early_stopping_patience: 5
+  checkpoint_dir: "outputs/checkpoints"
+  resume_checkpoint: null # or path to .pt file
+
+paths:
+  logs_dir: "outputs/logs"
+  reports_dir: "outputs/reports"
+  error_log: "outputs/logs/pipeline_errors.log"

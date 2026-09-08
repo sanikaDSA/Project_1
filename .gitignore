@@ -1,0 +1,110 @@
+# ==========================================
+# ENVIRONMENT & SECRETS (PREVENT API KEYS LEAK)
+# ==========================================
+.env
+*.env
+.env.*
+!.env.example
+backend/.env
+backend/config/.env
+config/.env
+
+# ==========================================
+# PYTHON ARTIFACTS & BYTECODE
+# ==========================================
+__pycache__/
+*/__pycache__/
+*/*/__pycache__/
+*/*/*/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+*.manifest
+*.spec
+
+# ==========================================
+# VIRTUAL ENVIRONMENTS
+# ==========================================
+venv/
+.venv/
+env/
+.env/
+ENV/
+env.bak/
+venv.bak/
+virtualenv/
+
+# ==========================================
+# BINARY WHEELS & DEPENDENCY ARCHIVES
+# ==========================================
+*.whl
+backend/wheels/
+wheels/
+
+# ==========================================
+# AUDIO, ML CHECKPOINTS & GENERATED REPORTS
+# ==========================================
+*.wav
+*.mp3
+*.flac
+*.m4a
+*.ogg
+*.aac
+*.pt
+*.pth
+*.onnx
+*.bin
+*.h5
+*.tflite
+*.ckpt
+checkpoints/
+models/
+outputs/
+backend/outputs/
+datasets/processed_audio/
+datasets/raw_audio/
+datasets/manifests/*.jsonl
+datasets/manifests/*.csv
+
+# ==========================================
+# LOGS & TEMPORARY RUNTIME SESSIONS
+# ==========================================
+*.log
+logs/
+outputs/logs/
+backend/outputs/logs/
+backend/outputs/reports/
+outputs/reports/
+
+# ==========================================
+# IDE, SYSTEM & EDITOR FILES
+# ==========================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+*.bak
+
+processed_audio/
+raw_audio/
