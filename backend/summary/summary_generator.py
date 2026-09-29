@@ -104,7 +104,7 @@ class SummaryGenerator:
         try:
             with open(txt_rel_path, "w", encoding="utf-8") as f:
                 f.write("======================================================================\n")
-                f.write("       POONA HOSPITAL & RESEARCH CENTRE — CLINICAL TRIAGE REPORT\n")
+                f.write("  POONA HOSPITAL & RESEARCH CENTRE — CLINICAL TRIAGE REPORT\n")
                 f.write("======================================================================\n\n")
                 f.write(f"Session ID: {session_state.session_id}\n")
                 f.write(f"Generated At: {structured_summary['generated_at']}\n")
@@ -217,7 +217,7 @@ class SummaryGenerator:
             f"Risk Signals Identified: {', '.join(s.risk_signals) if s.risk_signals else 'None'}",
             f"Emergency Escalation: {'YES - IMMEDIATE CARE REQUIRED' if s.emergency_escalation else 'NO'}",
             f"Recommended Clinician Urgency: {s.recommended_urgency.upper()} (Rationale: {', '.join(s.urgency_reasons)})",
-            "Clinical Impression: Pre-screening completed. Recommend comprehensive metabolic panel (FBS/PPBS, HbA1c) and clinician consultation at Poona Hospital.",
+            "Clinical Impression: Pre-screening completed. Recommend comprehensive metabolic panel (FBS/PPBS, HbA1c) and clinician consultation at Poona Hospital and Research Centre.",
             "Disclaimer: AI-generated pre-screening summary for human physician review. Not a diagnostic decision."
         ]
         return "\n".join(lines)

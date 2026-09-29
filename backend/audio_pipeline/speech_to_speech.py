@@ -259,9 +259,11 @@ class SpeechToSpeechPipeline:
         # Format matching exact standard specification
         return {
             "transcript": patient_text,
+            "doctor_reply": doctor_reply_text,
             "response_text": doctor_reply_text,
             "audio_output": audio_output,
-            "audio_url": audio_url,
+            "audio_url": audio_url or tts_res.get("audio_path"),
+            "audio_path": tts_res.get("audio_path"),
             "detected_language": detected_lang,
             "status": "success",
             "tts_engine": tts_res.get("engine", "local_tts"),

@@ -42,7 +42,7 @@ def clean_text_for_speech_audio(text: str) -> str:
     t = re.sub(r"\bFBS\b", " फास्टिंग ब्लड शुगर ", t, flags=re.IGNORECASE)
     t = re.sub(r"\bPPBS\b", " पीपी ब्लड शुगर ", t, flags=re.IGNORECASE)
     t = re.sub(r"\bBP\b", " ब्लड प्रेशर ", t, flags=re.IGNORECASE)
-    t = re.sub(r"\bPoona Hospital\b", " पूना हॉस्पिटल ", t, flags=re.IGNORECASE)
+    t = re.sub(r"\b(Poona Hospital and Research Centre|Poona Hospital|Deenanath Mangeshkar Hospital|DMH)\b", " पूना हॉस्पिटल ", t, flags=re.IGNORECASE)
     t = re.sub(r"\bMetformin\b", " मेटफॉर्मिन ", t, flags=re.IGNORECASE)
     t = re.sub(r"\bInsulin\b", " इंसुलिन ", t, flags=re.IGNORECASE)
     t = re.sub(r"\bParacetamol\b", " पैरासिटामोल ", t, flags=re.IGNORECASE)

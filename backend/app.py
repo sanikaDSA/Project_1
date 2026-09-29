@@ -55,9 +55,12 @@ app.add_middleware(
 )
 
 os.makedirs("static", exist_ok=True)
+os.makedirs("outputs", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/outputs", StaticFiles(directory="outputs"), name="outputs")
 
 training_state = {
+    
     "is_training": False,
     "status": "idle",
     "current_epoch": 0,
@@ -105,7 +108,7 @@ async def health_check():
     return {
         "status": "online",
         "app_name": "Diabetes Dost — AI Voice Pre-Screener for Diabetes",
-        "hospital_name": "Poona Hospital",
+        "hospital_name": "Poona Hospital and Research Centre",
         "motto": "॥ आरोग्यक्षेमं वहाम्यहम् ॥",
         "bot_name": "Diabetes Dost",
         "language": "hi-IN",
@@ -135,6 +138,30 @@ async def stream_audio(filename: str):
         if target.exists():
             return FileResponse(str(target), media_type="audio/wav")
     raise HTTPException(status_code=404, detail="Audio file not found")
+
+
+@app.post("/api/voice/s2s")
+async def process_voice_speech_to_speech(
+    file: UploadFile = File(...),
+    language_code: Optional[str] = Form("hi-IN")
+):
+    """
+    Direct Speech-to-Speech (S2S) Endpoint:
+    Processes raw recorded patient audio (.wav), performs STT, AI Clinical reasoning, and TTS.
+    Returns: transcript, doctor_reply, response_text, audio_url, audio_path, audio_output, audio_file.
+    """
+    from audio_pipeline.speech_to_speech import SpeechToSpeechPipeline
+    s2s = SpeechToSpeechPipeline()
+    
+    # Save uploaded file to raw_audio
+    temp_dir = Path("datasets/raw_audio")
+    temp_dir.mkdir(parents=True, exist_ok=True)
+    temp_path = temp_dir / f"direct_voice_in_{file.filename}"
+    with open(temp_path, "wb") as f_out:
+        f_out.write(await file.read())
+        
+    result = s2s.process_voice_conversation(temp_path, language_code=language_code or "hi-IN")
+    return JSONResponse(content=result)
 
 
 # ==========================================

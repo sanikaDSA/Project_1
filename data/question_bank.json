@@ -6,7 +6,7 @@
       "question_id": "COM_CONSENT",
       "topic": "consent",
       "branch": "common",
-      "question_hi": "नमस्ते, मेरा नाम Diabetes Dost है। मैं Doctor से मिलने से पहले आपकी Diabetes से जुड़ी कुछ Health जानकारी समझने में help करूंगा। क्या आप बातचीत और Audio Recording के लिए सहमत हैं?",
+      "question_hi": "नमस्ते, मेरा नाम Diabetes Dost है। मैं Doctor से मिलने से पहले आपकी Diabetes से जुड़ी कुछ Health जानकारी समझने में help करूंगी। क्या आप बातचीत और Audio Recording के लिए सहमत हैं?",
       "priority": "mandatory",
       "required": true,
       "follow_up_topics": ["demographics"]

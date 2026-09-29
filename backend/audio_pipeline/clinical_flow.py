@@ -560,7 +560,7 @@ class ClinicalConversationSession:
                     resp = f"{ack_name}बताइए, आपको यह तकलीफ कब से हो रही है?"
                 return self._format_response("ACK_DEMOGRAPHICS_CONTINUE", "clinical_progression", resp)
 
-        # 5. Check Diabetes Risk Symptoms & Provide Awareness + Poona Hospital Recommendation
+        # 5. Check Diabetes Risk Symptoms & Provide Awareness + Hospital Recommendation
         diabetes_risk_symptoms = ["excessive_thirst", "frequent_urination"]
         has_diabetes_risk = any(s in self.state.active_symptoms for s in diabetes_risk_symptoms) or any(w in text_lower for w in ["प्यास लगती", "पेशाब आता", "तहान", "लघवी", "थकान और कमजोरी", "वजन कम"])
         if has_diabetes_risk and "diabetes_awareness_given" not in self.state.asked_questions and not self.state.known_diabetes:
@@ -605,7 +605,7 @@ class ClinicalConversationSession:
                 resp = f"{name_prefix}Insulin का इंजेक्शन मुख्य भोजन से 15 से 20 मिनट पहले लिया जाता है।"
                 return self._format_response("MED_TIMING_INSULIN", "medication", resp)
 
-        # D. Lab Test / Blood Test / Consultation Inquiries -> Recommend Poona Hospital
+        # D. Lab Test / Blood Test / Consultation Inquiries -> Recommend Hospital
         if any(w in text_lower for w in ["रक्त तपासणी", "ब्लड टेस्ट", "cbc", "खून की जांच", "test कब", "टेस्ट कब", "डॉक्टर को दिखाना", "जांच कहां"]):
             self.state.hospital_recommendation_given = True
             resp = f"{name_prefix}लक्षणों की सही पुष्टि के लिए CBC और ब्लड टेस्ट की सलाह दी जाती है। आप Poona Hospital में डॉक्टर से परामर्श और सभी जरूरी टेस्ट करवा सकते हैं।"
@@ -636,7 +636,7 @@ class ClinicalConversationSession:
                 resp = f"ठीक है {name_prefix}आप {med_list} ले रहे हैं। इसे भोजन के तुरंत बाद लें। क्या आपको बार-बार पेशाब या बहुत प्यास लग रही है?"
                 return self._format_response("DIA_MED_ACK", "current_medications", resp)
 
-            # Follow-up with Poona Hospital Recommendation
+            # Follow-up with Hospital Recommendation
             if "hospital_advised_dia" not in self.state.asked_questions:
                 self.state.asked_questions.append("hospital_advised_dia")
                 self.state.hospital_recommendation_given = True
@@ -668,7 +668,7 @@ class ClinicalConversationSession:
                     follow_up = "क्या इसके साथ चक्कर या कमजोरी भी महसूस हो रही है?"
                 return self._format_response(f"ASK_ASSOC_{primary_sym.upper()}", sym_data["category"], f"{name_prefix}{follow_up}")
 
-            # Guidance + Poona Hospital recommendation for persistent symptoms
+            # Guidance + Hospital recommendation for persistent symptoms
             dur_text = f"{dur} से " if dur else ""
             if not self.state.hospital_recommendation_given and "hospital_rec_done" not in self.state.asked_questions:
                 self.state.asked_questions.append("hospital_rec_done")
@@ -676,6 +676,8 @@ class ClinicalConversationSession:
                 full_reply = f"{name_prefix}आपको {dur_text}{sym_data['name_hi']} है। {sym_data['guidance']} यदि तकलीफ 2-3 दिनों में ठीक न हो, तो आप Poona Hospital में डॉक्टर से परामर्श और जरूरी जांच के लिए संपर्क कर सकते हैं।"
             else:
                 full_reply = f"{name_prefix}आपको {dur_text}{sym_data['name_hi']} है। {sym_data['guidance']}"
+
+            return self._format_response(sym_data["id"], sym_data["category"], full_reply)
 
             return self._format_response(sym_data["id"], sym_data["category"], full_reply)
 

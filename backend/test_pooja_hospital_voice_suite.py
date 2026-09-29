@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 def run_poona_hospital_voice_suite():
     print("=" * 80)
-    print("🏥 POONA HOSPITAL HINDI MEDICAL VOICE ASSISTANT - FULL VALIDATION SUITE")
+    print("🏥 DEENANATH MANGESHKAR HOSPITAL HINDI MEDICAL VOICE ASSISTANT - FULL VALIDATION SUITE")
     print("=" * 80)
 
     # -------------------------------------------------------------
@@ -106,7 +106,7 @@ def run_poona_hospital_voice_suite():
     print("  ✓ PASS: Instant emergency escalation without questionnaire continuation.")
 
     print("\n" + "=" * 80)
-    print("🎉 ALL POONA HOSPITAL CLINICAL SUITE TESTS PASSED (100% SUCCESS)!")
+    print("🎉 ALL DEENANATH MANGESHKAR HOSPITAL CLINICAL SUITE TESTS PASSED (100% SUCCESS)!")
     print("=" * 80)
 
 

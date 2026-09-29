@@ -32,7 +32,7 @@ class DialogueManager:
 
         first_prompt = (
             "नमस्ते, मेरा नाम Diabetes Dost है। मैं Doctor से मिलने से पहले आपकी Diabetes से जुड़ी कुछ Health "
-            "जानकारी समझने में help करूंगा। क्या आप बातचीत और Audio Recording के लिए सहमत हैं?"
+            "जानकारी समझने में help करूंगी। क्या आप बातचीत और Audio Recording के लिए सहमत हैं?"
         )
 
         GLOBAL_AUDIT_LOGGER.log_event(sid, "SESSION_STARTED", {"initial_question_id": "COM_CONSENT"})
@@ -403,20 +403,22 @@ class DialogueManager:
     def _handle_consent_turn(self, state: SehatSessionState, utterance: str) -> Dict[str, Any]:
         cleaned = utterance.lower()
         
-        # 1. Explicit Rejection patterns (including negated agreement)
+        # 1. Check affirmative patterns (Marathi, Hindi, English)
+        affirmative_patterns = [
+            r"\b(yes|yeah|yep|sure|ok|okay|agree|agreed|consent|proceed|start|continue|no\s*problem|fine|ready)\b",
+            r"(हाँ|हां|बिल्कुल|सहमत|सहमति|ठीक\s*है|अवश्य|जरूर|चालेल|हो|होय|नक्की|माझी\s*संमती\s*आहे|सुरू\s*करा|चालू\s*करा|सांगा|तयार\s*आहे|काही\s*हरकत\s*नाही)"
+        ]
+        has_affirmative = any(re.search(pat, cleaned, re.IGNORECASE) for pat in affirmative_patterns)
+
+        # 2. Explicit Rejection patterns
         rejection_patterns = [
-            r"\b(disagree|don\'?t\s*agree|do\s*not\s*agree|not\s*agree|no\s*agree|reject|no|nahin|nahi|asahmat|mana|deny|cancel|stop|don\'?t\s*consent)\b",
-            r"(नहीं|ना|डिसअग्री|सहमति\s*नहीं|सहमत\s*नहीं|असहमत|मना|रिकॉर्ड\s*मत\s*करो|अनुमति\s*नहीं)"
+            r"\b(disagree|don\'?t\s*agree|do\s*not\s*agree|not\s*agree|no\s*agree|reject|asahmat|mana|deny|cancel|don\'?t\s*consent)\b",
+            r"(डिसअग्री|सहमति\s*नहीं|सहमत\s*नहीं|असहमत|मना|रिकॉर्ड\s*मत\s*करो|अनुमति\s*नहीं|संमती\s*नाही|नको|रेकॉर्ड\s*करू\s*नका)"
         ]
         is_rejection = any(re.search(pat, cleaned, re.IGNORECASE) for pat in rejection_patterns)
-        
-        # 2. Check affirmative override
-        has_affirmative_override = (
-            any(w in cleaned for w in ["हाँ", "हां", "yes", "bilkul", "बिल्कुल", "sure", "ok", "okay"]) and
-            not any(re.search(p, cleaned) for p in [r"सहमत\s*नहीं", r"not\s*agree", r"don\'?t\s*agree", r"सहमति\s*नहीं", r"disagree", r"डिसअग्री"])
-        )
 
-        if is_rejection and not has_affirmative_override:
+        # Strict rejection only if explicitly rejected without affirmative override
+        if is_rejection and not has_affirmative:
             state.consent = False
             state.consent_rejected = True
             state.is_completed = True
@@ -456,12 +458,13 @@ class DialogueManager:
     def _determine_branch(self, state: SehatSessionState, utterance: str):
         cleaned = utterance.lower()
         
-        # 1. First check explicit negation (NOT diabetic)
+        # 1. First check explicit negation (NOT diabetic - Marathi, Hindi, English)
         negations = [
             "नहीं है", "नहीं", "नही", "ना", "डायबिटीज नहीं", "शुगर नहीं", "nahi hai", "nahin", "nahi",
             "no diabetes", "no", "not diabetic", "normal", "नॉर्मल", "kuch nahi", "कुछ नहीं", "नेगेटिव", "negative",
             "i don't have diabetes", "i dont have diabetes", "i do not have diabetes", "no sugar", "non diabetic",
-            "never had diabetes", "healthy", "don't have sugar", "dont have sugar", "no sugar problem"
+            "never had diabetes", "healthy", "don't have sugar", "dont have sugar", "no sugar problem",
+            "डायबिटीस नाही", "शुगर नाही", "नाहीये", "नाही मला नाही", "काही त्रास नाही", "नॉर्मल"
         ]
         if any(w in cleaned for w in negations):
             state.branch = "not_diabetic"
@@ -469,11 +472,12 @@ class DialogueManager:
             state.diabetes_type = None
             return
 
-        # 2. Check unsure / symptoms / suspecting
+        # 2. Check unsure / symptoms / suspecting (Marathi, Hindi, English)
         unsure_words = [
             "पता नहीं", "शायद", "मालूम नहीं", "unsure", "not sure", "laksahn", "लक्षण", "doubt", "हो सकता",
             "symptoms", "doubtful", "borderline", "चेक कराना है", "check karana hai", "maybe", "i think so",
-            "i don't know", "i dont know", "suspecting", "possible", "not tested"
+            "i don't know", "i dont know", "suspecting", "possible", "not tested",
+            "माहित नाही", "शंका आहे", "तपासायचे आहे", "लक्षणे आहेत", "त्रास होतो", "चेक करायचे आहे"
         ]
         if any(w in cleaned for w in unsure_words):
             state.branch = "unsure"
@@ -481,12 +485,13 @@ class DialogueManager:
             state.diabetes_type = None
             return
 
-        # 3. Known diabetic positive indicators
+        # 3. Known diabetic positive indicators (Marathi, Hindi, English)
         positive_words = [
-            "हाँ", "हां", "yes", "diabetic", "diabetes", "डायबिटीज", "शुगर", "sugar", "sugar hai",
-            "diabetes hai", "type 2", "type 1", "टाइप 2", "टाइप 1", "yes i have", "haan", "ha",
+            "हाँ", "हां", "yes", "diabetic", "diabetes", "डायबिटीज", "डायबिटीस", "शुगर", "sugar", "sugar hai",
+            "diabetes hai", "type 2", "type 1", "टाइप 2", "टाइप 1", "yes i have", "haan", "ha", "हो", "होय",
             "पहले से है", "साल से", "महीने से", "i have diabetes", "i have sugar", "diagnosed with diabetes",
-            "i am diabetic", "i take insulin", "i take metformin", "suffering from diabetes", "taking medicines"
+            "i am diabetic", "i take insulin", "i take metformin", "suffering from diabetes", "taking medicines",
+            "गोळ्या चालू आहेत", "औषध चालू आहे", "इन्सुलिन चालू आहे", "वर्ष झाले"
         ]
         if any(w in cleaned for w in positive_words):
             state.branch = "known_diabetic"
@@ -497,11 +502,11 @@ class DialogueManager:
     def _extract_demographics(self, state: SehatSessionState, utterance: str):
         u_lower = utterance.lower()
 
-        # 1. Age extraction (Digits + Hindi words + English words)
+        # 1. Age extraction (Digits + Marathi/Hindi words + English words)
         age_val = None
         
         # Check direct integer match with optional age/years prefix or suffix
-        age_match = re.search(r"\b(?:age|age\s*is|aged|i\s*am|i\'?m|उम्र|आयु)?\s*(\d{1,3})\s*(?:वर्ष|साल|years?|saal|yr|yrs|sal|old)?\b", utterance, re.IGNORECASE)
+        age_match = re.search(r"\b(?:age|age\s*is|aged|i\s*am|i\'?m|उम्र|आयु|वय|माझे\s*वय|माझं\s*वय)?\s*(\d{1,3})\s*(?:वर्ष|वर्षे|साल|years?|saal|yr|yrs|sal|old)?\b", utterance, re.IGNORECASE)
         if age_match:
             try:
                 v = int(age_match.group(1))
@@ -512,18 +517,10 @@ class DialogueManager:
 
         if not age_val:
             word_num_map = {
-                "एक": 1, "दो": 2, "तीन": 3, "चार": 4, "पांच": 5, "छह": 6, "सात": 7, "आठ": 8, "नौ": 9, "दस": 10,
-                "ग्यारह": 11, "बारह": 12, "तेरह": 13, "चौदह": 14, "पंद्रह": 15, "सोलह": 16, "सत्रह": 17, "अट्ठारह": 18, "उन्नीस": 19, "बीस": 20,
-                "इक्कीस": 21, "बाईस": 22, "तेईस": 23, "चौबीस": 24, "पच्चीस": 25, "छब्बीस": 26, "सत्ताईस": 27, "अट्ठाईस": 28, "उनतीस": 29, "तीस": 30,
-                "इकतीस": 31, "बत्तीस": 32, "तैंतीस": 33, "चौंतीस": 34, "पैंतीस": 35, "छत्तीस": 36, "सैंतीस": 37, "अड़तीस": 38, "उनतालीस": 39, "चालीस": 40,
-                "इकतालीस": 41, "बयालीस": 42, "तैंतालीस": 43, "चवालीस": 44, "पैंतालीस": 45, "छियालीस": 46, "सैंतालीस": 47, "अड़तालीस": 48, "उनचास": 49, "पचास": 50,
-                "इक्यावन": 51, "बावन": 52, "तिरेपन": 53, "चौवन": 54, "पचपन": 55, "छप्पन": 56, "सत्तावन": 57, "अट्ठावन": 58, "उनसठ": 59, "साठ": 60,
-                "इकसठ": 61, "बासठ": 62, "तिरेसठ": 63, "चौंसठ": 64, "पैंसठ": 65, "छियासठ": 66, "सरसठ": 67, "अड़सठ": 68, "उनहत्तर": 69, "सत्तर": 70,
-                "इकहत्तर": 71, "बहत्तर": 72, "तिहत्तर": 73, "चौहत्तर": 74, "पचहत्तर": 75, "छिहत्तर": 76, "सतहत्तर": 77, "अठहत्तर": 78, "उन्नासी": 79, "अस्सी": 80,
-                "twenty": 20, "twenty one": 21, "twenty two": 22, "twenty three": 23, "twenty four": 24, "twenty five": 25,
-                "thirty": 30, "thirty one": 31, "thirty two": 32, "thirty three": 33, "thirty four": 34, "thirty five": 35,
-                "forty": 40, "forty five": 45, "fifty": 50, "fifty five": 55,
-                "sixty": 60, "sixty five": 65, "seventy": 70, "eighty": 80
+                "एक": 1, "दो": 2, "तीन": 3, "चार": 4, "पांच": 5, "पाच": 5, "छह": 6, "सहा": 6, "सात": 7, "आठ": 8, "नौ": 9, "नऊ": 9, "दस": 10, "दहा": 10,
+                "ग्यारह": 11, "अकरा": 11, "बारह": 12, "बारा": 12, "तेरह": 13, "तेरा": 13, "चौदह": 14, "चौदा": 14, "पंद्रह": 15, "पंधरा": 15, "सोलह": 16, "सोळा": 16, "सत्रह": 17, "सतरा": 17, "अट्ठारह": 18, "अठरा": 18, "उन्नीस": 19, "एकोणीस": 19, "बीस": 20, "वीस": 20,
+                "तीस": 30, "चालीस": 40, "चाळीस": 40, "पचास": 50, "पन्नास": 50, "साठ": 60, "सत्तर": 70, "अस्सी": 80, "ऐंशी": 80,
+                "twenty": 20, "twenty five": 25, "thirty": 30, "thirty five": 35, "forty": 40, "forty five": 45, "fifty": 50, "fifty five": 55, "sixty": 60, "sixty five": 65, "seventy": 70, "eighty": 80
             }
             for w, num in word_num_map.items():
                 if re.search(r"(?:^|[^\w\u0900-\u097F])" + re.escape(w) + r"(?:[^\w\u0900-\u097F]|$)", u_lower):
@@ -533,16 +530,16 @@ class DialogueManager:
         if age_val:
             state.demographics["age"] = age_val
 
-        # 2. Gender extraction (Devanagari + English + Hinglish transliterations)
+        # 2. Gender extraction (Devanagari + English + Marathi + Hinglish)
         u_clean_gender = re.sub(r"[।,;:\.\?!()\"'/\-_।॥]", " ", u_lower)
         gender_words_in_utterance = set(u_clean_gender.strip().split())
 
         male_tokens = [
-            "पुरुष", "मेल", "लड़का", "आदमी", "मर्द", "जेंट्स", "जेंटलमैन", "बॉय", "पुरूष",
+            "पुरुष", "मेल", "लड़का", "मुलगा", "आदमी", "मर्द", "जेंट्स", "जेंटलमैन", "बॉय", "पुरूष",
             "male", "man", "men", "boy", "guy", "gents", "gentleman", "purush", "aadmi", "admi", "ladka", "mard", "mr"
         ]
         female_tokens = [
-            "महिला", "स्त्री", "फीमेल", "फिमेल", "लड़की", "औरत", "लेडी", "गर्ल", "नारी", "सुश्री",
+            "महिला", "स्त्री", "फीमेल", "फिमेल", "लड़की", "मुलगी", "औरत", "बाई", "लेडी", "गर्ल", "नारी", "सुश्री",
             "female", "woman", "women", "lady", "girl", "aurat", "stri", "mahila", "ladki", "nari", "mrs", "ms", "miss"
         ]
 
@@ -558,19 +555,19 @@ class DialogueManager:
 
         # 3. Clean Name extraction
         name_already_set = bool(state.demographics.get("name"))
-        explicit_name_intro = any(re.search(r"(?:^|[^\w\u0900-\u097F])" + re.escape(w) + r"(?:[^\w\u0900-\u097F]|$)", u_lower) for w in ["मेरा नाम", "my name is", "my name", "naam", "नाम", "i am", "i'm", "this is", "name is"])
+        explicit_name_intro = any(re.search(r"(?:^|[^\w\u0900-\u097F])" + re.escape(w) + r"(?:[^\w\u0900-\u097F]|$)", u_lower) for w in ["मेरा नाम", "माझे नाव", "माझं नाव", "माझ नाव", "my name is", "my name", "naam", "नाव", "नाम", "i am", "i'm", "this is", "name is"])
         
         if not name_already_set or explicit_name_intro:
             name_clean = utterance
             stop_words = [
-                "मेरा नाम", "मेरी उम्र", "नाम", "my name is", "my name", "i am", "name is", "name", "i'm", "this is", "naam",
+                "मेरा नाम", "मेरी उम्र", "माझे नाव", "माझं नाव", "माझ नाव", "माझे वय", "माझं वय", "नाव", "नाम", "my name is", "my name", "i am", "name is", "name", "i'm", "this is", "naam",
                 "माय नेम इज़", "माय नेम इज", "माय नेम इस", "माय नेम", "माय एज इज़", "माय एज इज", "माय एज इस", "माय एज", "माय", "आई एम", "आय एम",
-                "हूँ", "हूं", "हुं", "हु", "हू", "साल", "वर्ष", "का हूँ", "की हूँ", "का हूं", "की हूं",
-                "male", "female", "मेल", "फीमेल", "फिमेल", "पुरुष", "महिला", "लड़का", "लड़की", "आदमी", "औरत",
-                "years old", "years", "old", "age", "saal", "varsh", "sal", "umra", "umar", "ayu", "ka", "ki", "ke", "hai", "hain", "hoon", "hun",
-                "और", "तथा", "एवं", "मैं", "मै", "है", "हैं", "उम्र", "आयु", "my", "is", "and", "a", "an", "the", "please", "here",
+                "हूँ", "हूं", "हुं", "हु", "हू", "आहे", "साल", "वर्ष", "वर्षे", "का हूँ", "की हूँ", "का हूं", "की हूं",
+                "male", "female", "मेल", "फीमेल", "फिमेल", "पुरुष", "महिला", "स्त्री", "मुलगा", "मुलगी", "लड़का", "लड़की", "आदमी", "औरत",
+                "years old", "years", "old", "age", "saal", "varsh", "sal", "umra", "umar", "vay", "ayu", "ka", "ki", "ke", "hai", "hain", "hoon", "hun", "aahe",
+                "और", "आणि", "तथा", "एवं", "मैं", "मै", "मी", "है", "हैं", "उम्र", "आयु", "वय", "my", "is", "and", "a", "an", "the", "please", "here",
                 "लिंग", "ling", "gender", "सेक्स", "sex", "स्त्री", "मर्द", "जेंट्स", "gentleman", "पुरूष",
-                "मेरा", "मेरी", "मेरे", "mera", "meri", "mere", "आगे", "एज", "जेंडर", "ईयर्स", "ओल्ड", "एंड", "इस", "इज़", "इज", "जी", "ji", "sahab", "mahila", "purush"
+                "मेरा", "मेरी", "मेरे", "माझा", "माझी", "माझे", "mera", "meri", "mere", "पुढे", "आगे", "एज", "जेंडर", "ईयर्स", "ओल्ड", "एंड", "इस", "इज़", "इज", "जी", "ji", "sahab", "mahila", "purush"
             ]
             
             name_clean = re.sub(r"[,;:\.\?!()\"'/\-_]", " ", name_clean)
@@ -579,11 +576,11 @@ class DialogueManager:
                 name_clean = re.sub(r"(?:^|[^\w\u0900-\u097F])" + re.escape(rem) + r"(?:[^\w\u0900-\u097F]|$)", " ", name_clean, flags=re.IGNORECASE)
 
             invalid_name_particles = {
-                "है", "हैं", "हूँ", "हूं", "हुं", "हु", "हू", "का", "की", "के", "और", "मैं", "मै", "से", "को",
+                "है", "हैं", "हूँ", "हूं", "हुं", "हु", "हू", "आहे", "का", "की", "के", "और", "आणि", "मैं", "मै", "मी", "से", "को",
                 "is", "am", "are", "and", "i", "my", "me", "he", "she", "male", "female", "मेल", "फीमेल", "फिमेल",
-                "लिंग", "ling", "gender", "पुरुष", "महिला", "स्त्री", "सेक्स", "sex", "उम्र", "age", "साल", "वर्ष", "नाम", "name",
-                "मेरा", "मेरी", "मेरे", "mera", "meri", "mere", "माय", "नेम", "आगे", "एज", "जेंडर", "ईयर्स", "ओल्ड", "एंड",
-                "इस", "इज़", "इज", "details", "umra", "umar", "sal", "saal", "varsh", "mahila", "purush", "hun", "hoon", "hai", "hain", "naam", "ji", "ayu", "आयु"
+                "लिंग", "ling", "gender", "पुरुष", "महिला", "स्त्री", "सेक्स", "sex", "उम्र", "age", "वय", "साल", "वर्ष", "वर्षे", "नाम", "नाव", "name",
+                "मेरा", "मेरी", "मेरे", "माझा", "माझी", "माझे", "mera", "meri", "mere", "माय", "नेम", "आगे", "एज", "जेंडर", "ईयर्स", "ओल्ड", "एंड",
+                "इस", "इज़", "इज", "details", "umra", "umar", "vay", "sal", "saal", "varsh", "mahila", "purush", "hun", "hoon", "hai", "hain", "aahe", "naam", "ji", "ayu", "आयु"
             }
             name_words = [
                 w.strip(",.?!:;()\"'") for w in name_clean.strip().split()
@@ -885,7 +882,7 @@ class DialogueManager:
                     if isinstance(q, dict) and q.get("question_id") == qid:
                         return q.get("question_hi", "")
         if qid == "COM_CONSENT":
-            return "नमस्ते, मेरा नाम Diabetes Dost है। मैं Doctor से मिलने से पहले आपकी Diabetes से जुड़ी कुछ Health जानकारी समझने में help करूंगा। क्या आप बातचीत और Audio Recording के लिए सहमत हैं?"
+            return "नमस्ते, मेरा नाम Diabetes Dost है। मैं Doctor से मिलने से पहले आपकी Diabetes से जुड़ी कुछ Health जानकारी समझने में help करूंगी। क्या आप बातचीत और Audio Recording के लिए सहमत हैं?"
         elif qid == "COM_DEMOGRAPHICS":
             return "धन्यवाद। आपकी सही पहचान और रिकॉर्ड के लिए, कृपया अपना पूरा नाम, उम्र और लिंग बताइए।"
         elif qid == "COM_STATUS":
